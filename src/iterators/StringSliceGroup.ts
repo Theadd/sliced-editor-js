@@ -1,6 +1,6 @@
 import { StringSlice } from "./StringSlice"
 import { RefList } from "./RefList"
-import { ActionTrigger } from "./EventHandlers/ActionTrigger"
+import { ActionTrigger } from "../EventHandlers/ActionTrigger"
 
 export class StringSliceGroup {
 
@@ -132,5 +132,8 @@ export class StringSliceGroup {
         return text
     }
 
-    
+    public Insert(this: StringSliceGroup, text: string): boolean {
+        return this.ReplaceSelection(text === '\t' ? ''.padStart(this.TabSize) : text)
+    }
+
 }
