@@ -1,8 +1,9 @@
-import { StringSlice } from "./StringSlice"
-import { RefList } from "./RefList"
-import { ActionTrigger } from "../EventHandlers/ActionTrigger"
-import { SliceGroupCursor } from "./SliceGroupCursor"
-import { StringLineGroup } from "./StringLineGroup"
+import { StringSlice } from './StringSlice'
+import { RefList } from './RefList'
+import { ActionTrigger } from '../EventHandlers/ActionTrigger'
+import { SliceGroupCursor } from './SliceGroupCursor'
+import { StringLineGroup } from './StringLineGroup'
+import { IUndoHistory } from '../Modules/UndoHistory/IUndoHistory'
 
 export class StringSliceGroup {
 
@@ -17,7 +18,7 @@ export class StringSliceGroup {
     /// </summary>
     Count: number = 1
 
-    // TODO: UndoHistory: IUndoHistory = null
+    UndoHistory?: IUndoHistory
 
     /**
      * Wether it has multiline support or not. (Internal use only)
@@ -153,7 +154,7 @@ export class StringSliceGroup {
     /// <param name="fromLineIndex">Must be LOWER or equal to the second parameter. It won't throw otherwise.</param>
     /// <param name="toLineIndex"></param>
     /// <returns>StringLineGroup</returns>
-    public GetRange(fromLineIndex: number, toLineIndex: number): StringLineGroup {
+    public GetRange(this: StringSliceGroup, fromLineIndex: number, toLineIndex: number): StringLineGroup {
         let lines = new StringLineGroup(Math.abs(fromLineIndex - toLineIndex) + 1)
         
         for (let i: number = fromLineIndex; i <= toLineIndex; i++)
@@ -222,8 +223,121 @@ export class StringSliceGroup {
         return true
     }
 
-    public ReplaceSelection(text: string): boolean {
+    public ReplaceSelection(this: StringSliceGroup, text: string): boolean {
         return this.Replace(text, this.Cursor.SelectionStart, this.Cursor.SelectionEnd)
     }
+
+    public ApplyChange(
+        this: StringSliceGroup, 
+        atSliceIndex: number, 
+        removedSlicesCount: number, 
+        newSlices: RefList<StringSlice>, 
+        nextPosOffsetFromEnd: number, 
+        invalidateCache: boolean = true
+    ) {
+        this.LastChange = [atSliceIndex, removedSlicesCount, newSlices.Count]
+
+        if (this.UndoHistory && this.UndoHistory !== undefined)
+            this.UndoHistory.Add(this)
+        
+        if (removedSlicesCount > 0)
+            this.Slices.RemoveRange(atSliceIndex, removedSlicesCount)
+
+        this.Slices.InsertRange(atSliceIndex, newSlices)
+        this.Count = this.Slices.Count
+
+        var nextNewSliceIndex = atSliceIndex + newSlices.Count
+        var len = 0
+
+        for (var i = 0; i < nextNewSliceIndex; i++)
+            len += this.Slices.Get(i).Length
+
+        if (invalidateCache) {
+            this.cachedSliceIndex = 0
+            this.cachedSliceStart = 0
+        }
+        
+        this.Cursor.MoveTo(len - nextPosOffsetFromEnd, false)
+    }
+
+    /// <summary>
+    /// Provided a *dirty* StringSlice, with raw text that might contain multiple lines,
+    /// returns a list of StringSlices sharing the same original text string but referring
+    /// to their respective line parts.
+    /// </summary>
+    /// <param name="fullSlice"></param>
+    /// <returns></returns>
+    public SliceToLines(this: StringSliceGroup, fullSlice: StringSlice): RefList<StringSlice> {
+        let slices: RefList<StringSlice> = new RefList<StringSlice>()
+        
+        if (this.Multiline) {
+            let currentSlice: StringSlice = new StringSlice(fullSlice)
+
+            let i: number = fullSlice.Start
+            let end: number = fullSlice.End
+
+            while (i <= end) {
+                if (fullSlice.CharAt(i) === '\n') {
+                    currentSlice.End = i
+                    slices.Add(currentSlice)
+                    i = ++fullSlice.Start
+                    currentSlice = new StringSlice(fullSlice)
+                } else {
+                    i = ++fullSlice.Start
+                }
+            }
+
+            currentSlice.End = fullSlice.End
+
+            if (!(currentSlice.End < currentSlice.Start))
+                slices.Add(currentSlice)
+
+            return slices
+        }
+
+        slices.Add(new StringSlice(fullSlice.ToString().replace('\n', '')))
+
+        return slices
+    }
+
+    public GetNextWordPosition(fromPosition: number, direction: number): number {
+            if (direction != -1 && direction != 1)
+                throw new Error("Argument 'direction' in GetNextWordPosition must be -1 to look backwards or 1 for forwards.")
+
+            let [lineIndex, startPosition] = this.GetSliceAt(fromPosition)
+            let slice = this.SliceAt(lineIndex)
+            let endPosition = startPosition + slice.Length
+            let lastCharType = -1
+            let charType = -1
+            let pos = direction == -1 ? fromPosition - 1 : fromPosition
+
+            for (; pos <= endPosition && pos >= startPosition; pos += direction)
+            {
+                var c = slice.PeekChar(pos - startPosition);
+
+                
+
+                if (c == ' ') charType = 0;
+                else if (c == '\n') charType = 1;
+                else if (char.IsLetterOrDigit(c)) charType = 2;
+                else charType = 3;
+
+                if (lastCharType >= 0)
+                {
+                    if (lastCharType != charType && !(lastCharType == 0 && charType > 0))
+                        break;
+                }
+
+                lastCharType = charType;
+            }
+
+            if (Multiline && direction == -1 && fromPosition == pos + 1 && pos >= 0)
+                pos -= 1;
+
+            if (direction == 1 && pos > endPosition && fromPosition < endPosition - 1)
+                pos = endPosition - 1;
+
+            return direction == -1 ? pos + 1 : pos;
+        }
 
 }
