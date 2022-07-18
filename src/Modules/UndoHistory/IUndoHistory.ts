@@ -2,11 +2,11 @@ import { StringSliceGroup } from '../../Iterators/StringSliceGroup'
 
 export interface IUndoHistory {
 
-    Add(editor: StringSliceGroup): void
+  Add: (editor: StringSliceGroup) => void
 
-    Undo(editor: StringSliceGroup): void
+  Undo: (editor: StringSliceGroup) => void
 
-    Redo(editor: StringSliceGroup): void
+  Redo: (editor: StringSliceGroup) => void
 
-    Clear(): void
+  Clear: () => void
 }
