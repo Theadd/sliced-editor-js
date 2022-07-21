@@ -1,4 +1,4 @@
-import { StringSliceGroup } from './StringSliceGroup'
+import { StringSliceEngine } from '../Modules/TextEngine/StringSliceEngine'
 
 export class ActiveLineType {
   public Index: number
@@ -11,7 +11,7 @@ export class ActiveLineType {
 }
 
 export class SliceGroupCursor {
-  SliceGroup: StringSliceGroup
+  SliceGroup: StringSliceEngine
   Position: number
   Offset: number
   Column: number
@@ -25,7 +25,7 @@ export class SliceGroupCursor {
     return this.Offset < 0 ? this.Position : this.Position + this.Offset
   }
 
-  constructor (sliceGroup: StringSliceGroup) {
+  constructor (sliceGroup: StringSliceEngine) {
     this.SliceGroup = sliceGroup
     this.Position = 0
     this.Offset = 0

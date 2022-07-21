@@ -1,3 +1,5 @@
+import { StringSliceEngine } from '../TextEngine/StringSliceEngine'
+import { ITextEngine } from "../TextEngine/ITextEngine"
 import Common from '../Misc/Common'
 import { IUndoHistory } from '../UndoHistory/IUndoHistory'
 
@@ -7,21 +9,41 @@ interface ILineBlockProcessor {
   Length: () => number
 }
 
-interface ISlicedEditorContext {
-  BlockProcessor?: ILineBlockProcessor
+export interface ISlicedConfig {
+  Modules?: {
+    TextEngine?: ITextEngine
+    UndoHistory?: IUndoHistory
+    BlockProcessor?: ILineBlockProcessor
+  }
+  Helpers?: {
+    IsLetter?: (char: string) => boolean
+    IsDigit?: (char: string) => boolean
+  }
+  Config?: {
+    Multiline?: boolean
+  }
 }
 
-interface ISlicedConfig {
-  UndoHistory?: IUndoHistory
-  IsLetter: (char: string) => boolean
-  IsDigit: (char: string) => boolean
-  Context: ISlicedEditorContext
+export const CreateContext = (config: ISlicedConfig = {}) => {
+
+  let BasicConfig: ISlicedConfig = {
+    Modules: {
+      TextEngine: config.Modules?.TextEngine ?? new StringSliceEngine(),
+      UndoHistory: config.Modules?.UndoHistory ?? undefined,
+      BlockProcessor: config.Modules?.BlockProcessor ?? undefined
+    },
+    Helpers: {
+      IsLetter: Common.IsLetter,
+      IsDigit: Common.IsDigit
+    },
+    Config: {
+      Multiline: true
+    }
+  }
+
+  return BasicConfig
 }
 
-const BasicConfig: ISlicedConfig = {
-  IsLetter: Common.IsLetter,
-  IsDigit: Common.IsDigit
-}
 
 // interface CallOrConstruct {
 //     new (s: string): Date;
