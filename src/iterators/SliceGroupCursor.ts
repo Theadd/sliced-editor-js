@@ -1,26 +1,21 @@
 import { StringSliceEngine } from '../Modules/TextEngine/StringSliceEngine'
 
-// export class ActiveLineType {
-//   public Index: number
-//   public StartPosition: number
+export class ActiveLineType {
+  public Index: number
+  public StartPosition: number
 
-//   constructor (index: number, startPosition: number) {
-//     this.Index = index
-//     this.StartPosition = startPosition
-//   }
-// }
-
-export type TextCursorType = [
-  /*Index:*/ number,
-  /*StartPosition:*/ number
-]
+  constructor (index: number, startPosition: number) {
+    this.Index = index
+    this.StartPosition = startPosition
+  }
+}
 
 export class SliceGroupCursor {
   SliceGroup: StringSliceEngine
   Position: number
   Offset: number
   Column: number
-  ActiveLine: TextCursorType
+  ActiveLine: ActiveLineType
 
   get SelectionStart (): number {
     return this.Offset < 0 ? this.Position + this.Offset : this.Position
@@ -35,7 +30,7 @@ export class SliceGroupCursor {
     this.Position = 0
     this.Offset = 0
     this.Column = -1
-    this.ActiveLine = [0, 0]
+    this.ActiveLine = new ActiveLineType(0, 0)
   }
 
   /// <summary>
@@ -43,13 +38,13 @@ export class SliceGroupCursor {
   /// </summary>
   /// <param name="nextPos">Next Position, in absolute values</param>
   /// <param name="keepOffset">Whether to update selection offset from last position or reset it to 0</param>
-  public MoveTo (this: SliceGroupCursor, nextPos: number, keepOffset: boolean = false): void {
+  public MoveTo (this: SliceGroupCursor, nextPos: number, keepOffset: boolean = false) {
     if (nextPos >= 0) {
       if (nextPos > this.Position && nextPos > this.SliceGroup.Length) { nextPos = this.SliceGroup.Length }
 
       this.Offset -= nextPos - this.Position
       this.Position = nextPos
-      this.ActiveLine = this.SliceGroup.GetSliceAt(nextPos)
+      this.ActiveLine = new ActiveLineType(...(this.SliceGroup.GetSliceAt(nextPos)))
       this.Column = -1
     }
 
@@ -57,10 +52,10 @@ export class SliceGroupCursor {
     this.SliceGroup.NotifyChanges()
   }
 
-  public MoveToLine (this: SliceGroupCursor, lineIndex: number, keepOffset: boolean = false): void {
+  public MoveToLine (this: SliceGroupCursor, lineIndex: number, keepOffset: boolean = false) {
     let nextPos = this.Position
 
-    if (this.Column == -1) { this.Column = this.Position - this.ActiveLine[1] }
+    if (this.Column == -1) { this.Column = this.Position - this.ActiveLine.StartPosition }
 
     if (lineIndex < 0) {
       nextPos = 0
@@ -75,7 +70,7 @@ export class SliceGroupCursor {
 
     this.Offset -= nextPos - this.Position
     this.Position = nextPos
-    this.ActiveLine = this.SliceGroup.GetSliceAt(nextPos)
+    this.ActiveLine = new ActiveLineType(...(this.SliceGroup.GetSliceAt(nextPos)))
 
     if (!keepOffset) this.Offset = 0
     this.SliceGroup.NotifyChanges()
