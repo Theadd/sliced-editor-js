@@ -30,6 +30,7 @@ export const SlicedText = (props: ISlicedViewProps) => {
         setContent(context.Modules!.TextEngine!.ToString())
       }
 
+
       context.Modules!.TextEngine!.OnChange.Add(handleEditorChange)
     },
     []

@@ -35,17 +35,17 @@ export const KeyboardEventHandler = ({ context, hasFocus, children }: Props) => 
       // TODO: Finish porting this section of code from c#
 
       if (e.keyCode >= 32 || e.key === '\n') {
-          e.StopPropagation();
+          e.stopPropagation()
 
           // TODO: if (!TextView.ReadOnly)
             // TODO: CHECK: e.nativeEvent.which //= 67 for keyCode = 67 (character: "c")
             // TODO: CHECK: String.fromCharCode(e.nativeEvent.which OR e.keyCode) // e.charCode is always 0
 
-            context.Modules.TextEngine!.Insert(e.key);
+            context.Modules.TextEngine!.Insert(e.key)
       }
 
       if (hasFocus) {
-        console.log(JSON.stringify([e.key, e.code, e.charCode, e.keyCode]));
+        console.log(JSON.stringify([e.key, e.code, e.charCode, e.keyCode]))
       }
     }
 

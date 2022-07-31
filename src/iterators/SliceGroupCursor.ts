@@ -1,18 +1,18 @@
 import { StringSliceEngine } from '../Modules/TextEngine/StringSliceEngine'
 
-export class ActiveLineType {
-  public Index: number
-  public StartPosition: number
+// export class ActiveLineType {
+//   public Index: number
+//   public StartPosition: number
 
-  constructor (index: number, startPosition: number) {
-    this.Index = index
-    this.StartPosition = startPosition
-  }
-}
+//   constructor (index: number, startPosition: number) {
+//     this.Index = index
+//     this.StartPosition = startPosition
+//   }
+// }
 
 export type TextCursorType = [
-  Index: number,
-  StartPosition: number
+  /*Index:*/ number,
+  /*StartPosition:*/ number
 ]
 
 export class SliceGroupCursor {

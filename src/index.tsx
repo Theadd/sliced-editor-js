@@ -1,7 +1,7 @@
 // import React, { useState } from 'react'
-import { ISlicedConfig, createContext } from './Modules/Configuration/index'
+import { ISlicedConfig } from './Modules/Configuration/index'
 import { SlicedText } from './UI/ReactUI/SlicedText'
-export { ISlicedConfig, createContext, SlicedText }
+export { ISlicedConfig, SlicedText }
 // export { CreateContext } from './Modules/Configuration/index'
 
 // export { CreateConfig }
