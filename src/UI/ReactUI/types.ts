@@ -3,14 +3,14 @@ import { ICreateSlicedContextProps } from "../../Modules/Configuration/createCon
 
 export type ISlicedViewProps = {
   initialValue?: string
-  // initialConfig?: ISlicedConfig
   multiline?: boolean
   tabIndex?: number
 } & ICreateSlicedContextProps
 
 export type ISlicedViewState = {
-  context: ISlicedConfig
   hasFocus: boolean
 }
 
-export type ISlicedStateAsChildProps = {} & ISlicedViewState
+export type IContextProps = {
+  context: ISlicedConfig
+}

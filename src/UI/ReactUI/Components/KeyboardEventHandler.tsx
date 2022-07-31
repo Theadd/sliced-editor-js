@@ -1,11 +1,11 @@
 import React from "react"
 import { keyboardEventToString } from "../../../Modules/EventHandler/Helpers"
 import { MappedActionType } from "../../../Modules/EventHandler/MappedActions"
-import { ISlicedStateAsChildProps } from "../types"
+import { IContextProps, ISlicedViewState } from "../types"
 
 
 
-type Props = { children?: React.ReactNode } & ISlicedStateAsChildProps
+type Props = { children?: React.ReactNode } & IContextProps & ISlicedViewState
 
 export const KeyboardEventHandler = ({ context, hasFocus, children }: Props) => {
 
@@ -50,6 +50,11 @@ export const KeyboardEventHandler = ({ context, hasFocus, children }: Props) => 
     }
 
     return (
-        <div onKeyDown={ onKeyDown }>{ children }</div>
+        <div onKeyDown={ onKeyDown }>
+          <div>
+            <small>KeyboardEventHandler.render() @ { new Date().getUTCMilliseconds() }</small>
+          </div>
+          { children }
+        </div>
     )
 }
